@@ -7,3 +7,12 @@ services:
     volumes:
       - ./site:/usr/share/nginx/html:ro
     restart: unless-stopped
+
+  monitor:
+    image: louislam/uptime-kuma:1
+    container_name: monitor
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data/uptime-kuma:/app/data
+    restart: unless-stopped
