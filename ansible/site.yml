@@ -1,0 +1,38 @@
+- name: Set up mini-ops environment
+  hosts: local
+  vars:
+    project_dir: /workspaces/mini-ops
+
+  tasks:
+    - name: Ensure folders exist
+      ansible.builtin.file:
+        path: "{{ project_dir }}/{{ item }}"
+        state: directory
+      loop: [site, docs, scripts, backups]
+
+    - name: Ensure scripts are executable
+      ansible.builtin.file:
+        path: "{{ project_dir }}/scripts/{{ item }}"
+        mode: "0755"
+      loop: [backup.sh, restore-test.sh, update.sh]
+
+    - name: Ensure data and backups are never committed to git
+      ansible.builtin.lineinfile:
+        path: "{{ project_dir }}/.gitignore"
+        line: "{{ item }}"
+        create: true
+      loop: ["data/", "backups/"]
+
+    - name: Start containers
+      ansible.builtin.command: docker compose up -d
+      args:
+        chdir: "{{ project_dir }}"
+      register: compose
+      changed_when: "'Started' in compose.stderr or 'Created' in compose.stderr"
+
+    - name: Check that the website responds
+      ansible.builtin.uri:
+        url: http://localhost:8080
+        return_content: true
+      register: page
+      failed_when: "'mini-ops is running' not in page.content"
