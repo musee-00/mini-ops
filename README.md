@@ -20,6 +20,7 @@ Runs in GitHub Codespaces (Ubuntu 24.04) with Docker Compose.
 | scripts/backup.sh | Backup with SHA-256 checksum and retention of the 7 latest backups |
 | scripts/restore-test.sh | Verifies that the latest backup can actually be restored |
 | scripts/update.sh | Safe update routine: backup, patch, health check, log |
+| scripts/dns-check.sh | DNS lookup report for a domain (A, MX, NS, TXT and more) |
 | ansible/ | Playbook that sets up and verifies the environment |
 | docs/ | Incident log, update log and restore test log |
 
@@ -48,6 +49,12 @@ Order: backup first, then system packages (apt), then container images, then a h
     ansible-playbook -i ansible/inventory.ini ansible/site.yml
 
 The playbook ensures folders, script permissions and .gitignore rules, starts the containers and checks that the website responds. It is idempotent: a second run reports changed=0.
+
+## DNS
+
+    ./scripts/dns-check.sh <domain>
+
+Looks up A, AAAA, CNAME, MX, NS and TXT records with dig and writes a report to docs/. Example: docs/dns-report-ju.se.md shows that mail is handled by Microsoft 365 (MX) and that the domain uses a strict SPF policy (-all).
 
 ## Runbook: website down
 
